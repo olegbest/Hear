@@ -13,7 +13,9 @@ const cors = require('cors');
 const routes = require('./routes/posts');
 app.use(cors({
     credentials: true,
-    origin: 'http://exam.botcube.co/'
+    origin: 'http://exam.botcube.co/',
+    allowedHeaders: ['sessionId', 'Content-Type'],
+    exposedHeaders: ['sessionId']
 }));
 
 
