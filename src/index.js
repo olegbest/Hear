@@ -11,7 +11,12 @@ const MongoStore = require('connect-mongo')(session);
 
 const cors = require('cors');
 const routes = require('./routes/posts');
-app.use(cors({credentials: true, origin: 'http://botcube.co/'}));
+app.use(cors({
+    credentials: true,
+    origin: 'http://exam.botcube.co/',
+    allowedHeaders: ['sessionId', 'Content-Type'],
+    exposedHeaders: ['sessionId']
+}));
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
@@ -45,7 +50,7 @@ app.post('/forgot', function (req, res) {
     });
 
     reset.on('request', function (req_, res_) {
-        req_.session.reset = { email : email, id : reset.id };
+        req_.session.reset = {email: email, id: reset.id};
         fs.createReadStream(__dirname + '/forgot.html').pipe(res_);
     });
 });
