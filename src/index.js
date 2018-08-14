@@ -11,7 +11,7 @@ const MongoStore = require('connect-mongo')(session);
 
 const cors = require('cors');
 const routes = require('./routes/posts');
-app.use(cors({credentials: true, origin: 'http://exam.botcube.co/'}));
+app.use(cors());
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
