@@ -26,12 +26,12 @@ app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-let forgot = require('password-reset')({
-    uri : 'http://localhost:8080/password_reset',
-    from : 'http://localhost/',
-    host : 'localhost', port : 25,
-});
-app.use(forgot.middleware);
+// let forgot = require('password-reset')({
+//     uri : 'http://localhost:8080/password_reset',
+//     from : 'http://localhost/',
+//     host : 'localhost', port : 25,
+// });
+// app.use(forgot.middleware);
 
 // Allows us to process the data
 
