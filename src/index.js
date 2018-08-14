@@ -11,10 +11,7 @@ const MongoStore = require('connect-mongo')(session);
 
 const cors = require('cors');
 const routes = require('./routes/posts');
-app.use(cors({
-    credentials: true,
-    origin: 'http://exam.botcube.co',
-}));
+app.use(cors({credentials: true, origin: 'http://exam.botcube.co'}));
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
@@ -29,12 +26,12 @@ app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-// let forgot = require('password-reset')({
-//     uri : 'http://localhost:8080/password_reset',
-//     from : 'http://localhost/',
-//     host : 'localhost', port : 25,
-// });
-// app.use(forgot.middleware);
+let forgot = require('password-reset')({
+    uri : 'http://localhost:8080/password_reset',
+    from : 'http://localhost/',
+    host : 'localhost', port : 25,
+});
+app.use(forgot.middleware);
 
 // Allows us to process the data
 
@@ -48,7 +45,7 @@ app.post('/forgot', function (req, res) {
     });
 
     reset.on('request', function (req_, res_) {
-        req_.session.reset = {email: email, id: reset.id};
+        req_.session.reset = { email : email, id : reset.id };
         fs.createReadStream(__dirname + '/forgot.html').pipe(res_);
     });
 });
