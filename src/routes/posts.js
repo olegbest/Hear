@@ -3,6 +3,8 @@ const passport = require('passport');
 const User = require('./../authentication/user');
 
 
+
+
 class routes {
     constructor(app) {
         this._app = app;
@@ -44,7 +46,7 @@ class routes {
 
         this._app.get('/', (req, res) => {
             if (req.isAuthenticated()) {
-                res.send({firstName: req.user.local.firstName});
+                res.send({firstName: req.user.local.firstName, authenticate: true});
             } else {
                 res.send({authenticate: false})
             }
@@ -53,12 +55,15 @@ class routes {
         });
 
         this._app.get('/login', (req, res) => {
-            if (req.isAuthenticated())
-                console.log("123")
+            if (req.isAuthenticated()) {
+                res.send({firstName: req.user.local.firstName, authenticate: true});
+            } else {
+                res.send({authenticate: false})
+            }
 
             // if they aren't redirect them to the home page
             // res.redirect('/');
-            console.log(56)
+
         });
 
 
@@ -66,7 +71,9 @@ class routes {
             successRedirect: '/', // redirect to the secure profile section
             failureRedirect: '/', // redirect back to the signup page if there is an error
             failureFlash: true // allow flash messages
-        }));
+        }), (req,res)=>{
+
+        });
 
         this._app.post('/login', passport.authenticate('local-login', {
             successRedirect: '/', // redirect to the secure profile section
@@ -86,7 +93,7 @@ class routes {
         // this._app.get('/profile', passport.authenticationMiddleware(), renderProfile);
     }
 
-    updateUserData(email, data) {
+    updateUserData(email,data) {
         console.log(data);
         User.findOne({'local.email': email}, function (err, user) {
             // if there are any errors, return the error
@@ -98,7 +105,7 @@ class routes {
                 user.local.firstName = data.firstName;
                 user.local.lastName = data.lastName;
                 user.local.birthday = data.birthday;
-                user.save((err) => {
+                user.save((err)=>{
                     if (err) console.log(err)
                 })
             }

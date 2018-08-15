@@ -48,13 +48,15 @@ module.exports = function (passport) {
                 // we are checking to see if the user trying to login already exists
                 User.findOne({'local.email': email}, function (err, user) {
                     // if there are any errors, return the error
-                    if (err)
+                    if (err) {
                         return done(err);
+                        console.log(err)
+                    }
 
                     // check to see if theres already a user with that email
                     if (user) {
-                        return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-
+                        return done(null, false);
+                        console.log("That email is already taken")
                     } else {
 
                         // if there is no user with that email
@@ -73,8 +75,11 @@ module.exports = function (passport) {
 
                         // save the user
                         newUser.save(function (err) {
-                            if (err)
+                            if (err){
                                 throw err;
+                                console.log(err)
+                            }
+                            console.log("User was register")
                             return done(null, newUser);
                         });
                     }
@@ -101,13 +106,13 @@ module.exports = function (passport) {
                     return done(err);
 
                 // if no user is found, return the message
-                if (!user){
+                if (!user) {
                     console.log('No user found.');
                     return done(null, false); // req.flash is the way to set flashdata using connect-flash
                 }
 
                 // if the user is found but the password is wrong
-                if (!user.validPassword(password)){
+                if (!user.validPassword(password)) {
                     console.log('Oops! Wrong password.');
                     return done(null, false); // create the loginMessage and save it to session as flashdata
                 }
