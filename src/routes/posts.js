@@ -143,7 +143,7 @@ class routes {
                             from: "Hear Hero Service",
                             to: email,
                             subject: "Password Reset",
-                            html: "<b><a href='http://localhost:8080/#/reset?id=" + token + "'>link</a></b>"
+                            html: "<b><a href='http://exam.botcube.co/#/reset?id=" + token + "'>link</a></b>"
                         };
                         smtpTransport.sendMail(mail, function (error, response) {
                             if (error) {
