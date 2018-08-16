@@ -49,14 +49,14 @@ module.exports = function (passport) {
                 User.findOne({'local.email': email}, function (err, user) {
                     // if there are any errors, return the error
                     if (err) {
-                        return done(err);
                         console.log(err)
+                        return done(err);
                     }
 
                     // check to see if theres already a user with that email
                     if (user) {
-                        return done(null, false);
                         console.log("That email is already taken")
+                        return done(null, false, {user: false, message: "That email is already taken"});
                     } else {
 
                         // if there is no user with that email
@@ -75,12 +75,12 @@ module.exports = function (passport) {
 
                         // save the user
                         newUser.save(function (err) {
-                            if (err){
+                            if (err) {
                                 throw err;
                                 console.log(err)
                             }
                             console.log("User was register")
-                            return done(null, newUser);
+                            return done(null, newUser, {user: true});
                         });
                     }
 
@@ -108,18 +108,18 @@ module.exports = function (passport) {
                 // if no user is found, return the message
                 if (!user) {
                     console.log('No user found.');
-                    return done(null, false); // req.flash is the way to set flashdata using connect-flash
+                    return done(null, false, {user: false}); // req.flash is the way to set flashdata using connect-flash
                 }
 
                 // if the user is found but the password is wrong
                 if (!user.validPassword(password)) {
                     console.log('Oops! Wrong password.');
-                    return done(null, false); // create the loginMessage and save it to session as flashdata
+                    return done(null, false, {user: true, password: false}); // create the loginMessage and save it to session as flashdata
                 }
 
                 // all is well, return successful user
                 console.log("вошел");
-                return done(null, user);
+                return done(null, user, {user: true, password: true});
             });
 
         }));
