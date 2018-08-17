@@ -135,7 +135,7 @@ class routes {
                 res.send({authenticate: true})
             } else {
                 let email = req.body.email;
-                chekUser(email, (status) => {
+                chekUser(email, (status, firstName) => {
                     if (status) {
                         let token = base64url(crypto.randomBytes(32));
                         req.sessionStore.reset = {email: email, id: token};
@@ -143,7 +143,9 @@ class routes {
                             from: "Hear Hero Service",
                             to: email,
                             subject: "Password Reset",
-                            html: "<b><a href='http://exam.botcube.co/#/reset?id=" + token + "'>link</a></b>"
+                            html: "<h4>Hi "+firstName+"</h4>" +
+                                "<p>Just to let you know, we’ve had a request to change your password. To do this, just follow the link below.</p>"+
+                                "<b><a href='http://exam.botcube.co/#/reset?id=" + token + "' style=\"width: 217px;height: 45px;font-size:16px;font-weight:bold;letter-spacing:0px;line-height:100%;text-align:center;text-decoration:none;color:#FFFFFF;background:#00008b;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;border-radius:20px;display:block;box-sizing: border-box; padding-top: 13px;\">Reset your password</a></b>"
                         };
                         smtpTransport.sendMail(mail, function (error, response) {
                             if (error) {
@@ -230,17 +232,19 @@ class routes {
     checkUser(email, callback) {
         User.findOne({'local.email': email}, function (err, user) {
             // if there are any errors, return the error
-            let status
+            let status;
+            let firstName = "";
             if (err)
                 return err;
 
             if (user) {
                 status = true
+                firstName = user.local.firstName
             } else if (!user) {
                 console.log('user not found');
                 status = false
             }
-            callback(status)
+            callback(status, firstName)
         })
     }
 
