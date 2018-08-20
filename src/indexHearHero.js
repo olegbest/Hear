@@ -10,16 +10,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 let config = require('./config/config');
 const history = require('connect-history-api-fallback');
-app.use(history({
-    rewrites: [
-        {
-            from: /^\/#\/.*$/,
-            to: function(context) {
-                return '/' + context.parsedUrl.pathname;
-            }
-        }
-    ]
-}));
+app.use(history());
 
 
 
