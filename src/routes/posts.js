@@ -3,15 +3,7 @@ const passport = require('passport');
 const User = require('./../authentication/user');
 const crypto = require('crypto');
 const base64url = require('base64url');
-const mailer = require("nodemailer");
-
-let smtpTransport = mailer.createTransport({
-    service: "Gmail",
-    auth: {
-        user: "HearHeroService@gmail.com",
-        pass: "Qwerty147852"
-    }
-});
+const sendMail = require('./../libs/senMail').sendMail;
 
 
 class routes {
@@ -24,6 +16,7 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
+            console.log(req.get('origin'));
             if (req.isAuthenticated()) {
                 res.send({
                     firstName: req.user.local.firstName,
@@ -131,6 +124,7 @@ class routes {
         let chekUser = this.checkUser;
 
         this._app.post('/forgot', function (req, res) {
+            // console.log( req.protocol + '://' + req.get('host') + req.originalUrl);
             if (req.isAuthenticated()) {
                 res.send({authenticate: true})
             } else {
@@ -139,24 +133,7 @@ class routes {
                     if (status) {
                         let token = base64url(crypto.randomBytes(32));
                         req.sessionStore.reset = {email: email, id: token};
-                        let mail = {
-                            from: "Hear Hero Service",
-                            to: email,
-                            subject: "Password Reset",
-                            html: "<h4>Hi "+firstName+"</h4>" +
-                                "<p>Just to let you know, we’ve had a request to change your password. To do this, just follow the link below.</p>"+
-                                "<b><a href='http://exam.botcube.co/#/reset?id=" + token + "' style=\"width: 217px;height: 45px;font-size:16px;font-weight:bold;letter-spacing:0px;line-height:100%;text-align:center;text-decoration:none;color:#FFFFFF;background:#00008b;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;border-radius:20px;display:block;box-sizing: border-box; padding-top: 13px;\">Reset your password</a></b>"
-                        };
-                        smtpTransport.sendMail(mail, function (error, response) {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                console.log("Message sent: " + response.message);
-                            }
-
-                            smtpTransport.close();
-
-                        });
+                        sendMail(firstName,email,token,req.get("origin"));
                         res.send({sendMail: true})
                     } else {
                         res.send({message: 'No user found'})
@@ -238,7 +215,7 @@ class routes {
                 return err;
 
             if (user) {
-                status = true
+                status = true;
                 firstName = user.local.firstName
             } else if (!user) {
                 console.log('user not found');
