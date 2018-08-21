@@ -36,21 +36,21 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 
 // ROUTES
 
-app.use((req, res, next) => {
-    let url = req.get('origin');
-    console.log(url+'/index.html');
-    fs.readFile(url+'/index.html', 'utf-8', (err, content) => {
-        if (err) {
-            console.log('Невозможно открыть файл "index.html".')
-        }
-
-        res.writeHead(200, {
-            'Content-Type': 'text/html; charset=utf-8'
-        });
-
-        res.end(content)
-    })
-});
+// app.use((req, res, next) => {
+//     let url = req.get('origin');
+//     console.log(url+'/index.html');
+//     fs.readFile(url+'/index.html', 'utf-8', (err, content) => {
+//         if (err) {
+//             console.log('Невозможно открыть файл "index.html".')
+//         }
+//
+//         res.writeHead(200, {
+//             'Content-Type': 'text/html; charset=utf-8'
+//         });
+//
+//         res.end(content)
+//     })
+// });
 
 let Routes = new routes(app);
 Routes.setup();
