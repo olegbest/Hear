@@ -9,9 +9,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 let config = require('./config/config');
-const history = require('connect-history-api-fallback');
-app.use(history());
-
+// const history = require('connect-history-api-fallback');
+// app.use(history());
 
 
 const cors = require('cors');
@@ -24,7 +23,7 @@ app.use(bodyParser()); // get information from html forms
 
 // required for passport
 app.use(session({
-    secret: 'ilovescotchscotchyscotchscotch',
+    secret: 'ilovescotchscotchyscotchscotch123HearHero',
     store: new MongoStore({url: config.dbURL, ttl: 5 * 24 * 60 * 60})
 })); // session secret
 app.use(passport.initialize());
@@ -36,6 +35,22 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 
 
 // ROUTES
+
+app.use((req, res, next) => {
+    let url = req.get('origin');
+    console.log(url+'/index.html');
+    fs.readFile(url+'/index.html', 'utf-8', (err, content) => {
+        if (err) {
+            console.log('Невозможно открыть файл "index.html".')
+        }
+
+        res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8'
+        });
+
+        res.end(content)
+    })
+});
 
 let Routes = new routes(app);
 Routes.setup();
