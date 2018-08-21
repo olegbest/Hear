@@ -4,6 +4,8 @@ const User = require('./../authentication/user');
 const crypto = require('crypto');
 const base64url = require('base64url');
 const sendMail = require('./../libs/senMail').sendMail;
+const ip = require('ip');
+const gSheets = require('./../googledocs/index');
 
 
 class routes {
@@ -16,7 +18,7 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
-            console.log(req.get('origin'));
+
             if (req.isAuthenticated()) {
                 res.send({
                     firstName: req.user.local.firstName,
@@ -47,9 +49,13 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
+            let ipUser = ip.address();
+
             if (req.isAuthenticated()) {
+                this.addNewUser(ipUser, req.user.local.email);
                 res.send({firstName: req.user.local.firstName, authenticate: true});
             } else {
+                this.addNewUser(ipUser, "");
                 res.send({authenticate: false, message: req.flash()})
             }
 
@@ -133,7 +139,7 @@ class routes {
                     if (status) {
                         let token = base64url(crypto.randomBytes(32));
                         req.sessionStore.reset = {email: email, id: token};
-                        sendMail(firstName,email,token,req.get("origin"));
+                        sendMail(firstName, email, token, req.get("origin"));
                         res.send({sendMail: true})
                     } else {
                         res.send({message: 'No user found'})
@@ -223,6 +229,38 @@ class routes {
             }
             callback(status, firstName)
         })
+    }
+
+    addNewUser(ipUser, email) {
+        if (email) {
+            gSheets.get("B1:B", (raw) => {
+                console.log(raw);
+                let hasUser = false;
+                for (let i = 0; i < raw.length; i++) {
+                    if (raw[i][0] === email) {
+                        hasUser = true;
+                        break;
+                    }
+                }
+                if (!hasUser) {
+                    gSheets.add("A1:B1", [[ipUser, email]])
+                }
+            });
+        } else {
+            gSheets.get("A1:A", (raw) => {
+                console.log(raw);
+                let hasUser = false;
+                for (let i = 0; i < raw.length; i++) {
+                    if (raw[i][0] === ipUser) {
+                        hasUser = true;
+                        break;
+                    }
+                }
+                if (!hasUser) {
+                    gSheets.add("A1:B1", [[ipUser, email]])
+                }
+            });
+        }
     }
 
 

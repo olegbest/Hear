@@ -15,7 +15,7 @@ let config = require('./config/config');
 
 const cors = require('cors');
 const routes = require('./routes/posts');
-app.use(cors({credentials: true, origin: 'http://exam.botcube.co'}));
+app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
@@ -51,6 +51,17 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 //         res.end(content)
 //     })
 // });
+
+
+/*
+You're all set!
+You're ready to start developing!
+Client ID
+1052353894686-aa9uosjaun29k7fl6el3m6bpgne2dgp8.apps.googleusercontent.com
+Client Secret
+pJ3dNzZ91P9Qkb2z8CpunhTL
+ */
+
 
 let Routes = new routes(app);
 Routes.setup();
