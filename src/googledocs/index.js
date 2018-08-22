@@ -97,6 +97,7 @@ module.exports = {
                 spreadsheetId: spreadsheetId,
                 range: range,
                 valueInputOption: "USER_ENTERED",
+
                 resource: {
                     values: values
                 }

@@ -166,6 +166,19 @@ class routes {
             }
         });
 
+
+        let updateTable = this.updateTableData;
+        this._app.post('/changeState', function (req, res) {
+            let ipUser = ip.address();
+            if (req.isAuthenticated()) {
+                updateTable(ipUser, req.user.local.email, req.body);
+                res.send({authenticate: true});
+            } else {
+                updateTable(ipUser, "", req.body);
+                res.send({authenticate: false})
+            }
+        });
+
         let update = this.updateUserData;
         this._app.post('/profile', function (req, res) {
             if (req.isAuthenticated()) {
@@ -232,38 +245,60 @@ class routes {
     }
 
     addNewUser(ipUser, email) {
-        if (email) {
-            gSheets.get("B1:B", (raw) => {
-                console.log(raw);
-                let hasUser = false;
-                for (let i = 0; i < raw.length; i++) {
-                    if (raw[i][0] === email) {
-                        hasUser = true;
-                        break;
-                    }
+        findUser(ipUser, email, (res) => {
+            console.log(res);
+            if (res > -1) {
+                if (email) {
+                    gSheets.update("A" + res + ":" + "B" + res, [[ipUser, email]])
+                } else {
+                    gSheets.update("A" + res + ":A", [[ipUser]])
                 }
-                if (!hasUser) {
-                    gSheets.add("A1:B1", [[ipUser, email]])
+            } else {
+                gSheets.add("A1:A", [[ipUser, email]]);
+            }
+        });
+
+
+    }
+
+    updateTableData(ipUser, email, data) {
+        console.log(ipUser);
+        console.log(email);
+        findUser(ipUser, email, (res) => {
+            console.log(data);
+            let range;
+            if (data.hasOwnProperty("leftEar")) {
+                if (data.leftEar) {
+                    range = data.type.range[0] + res;
+                } else {
+                    range = data.type.range[1] + res;
                 }
-            });
-        } else {
-            gSheets.get("A1:A", (raw) => {
-                console.log(raw);
-                let hasUser = false;
-                for (let i = 0; i < raw.length; i++) {
-                    if (raw[i][0] === ipUser) {
-                        hasUser = true;
-                        break;
-                    }
-                }
-                if (!hasUser) {
-                    gSheets.add("A1:B1", [[ipUser, email]])
-                }
-            });
-        }
+            } else {
+                 range = data.type.range + res;
+
+            }
+            gSheets.update(range, [[data.name]])
+        })
     }
 
 
+}
+
+function findUser(ipUser, email, callback) {
+    gSheets.get("A1:B", (raw) => {
+        console.log(raw);
+        for (let i = 0; i < raw.length; i++) {
+            if (raw[i][0] === ipUser) {
+                callback(i + 1);
+                return;
+            } else if (raw[i][1] === email) {
+                callback(i + 1);
+                return;
+
+            }
+        }
+        callback(-1);
+    });
 }
 
 module.exports = routes;
