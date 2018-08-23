@@ -4,7 +4,7 @@ const User = require('./../authentication/user');
 const crypto = require('crypto');
 const base64url = require('base64url');
 const sendMail = require('./../libs/senMail').sendMail;
-const ip = require('ip');
+// const ip = require('ip');
 const gSheets = require('./../googledocs/index');
 
 const requestIp = require('request-ip');
@@ -20,7 +20,7 @@ class routes {
         });
         this._app.get('/profile', (req, res) => {
             let clientIp = requestIp.getClientIp(req);
-            console.log(clientIp)
+            console.log(clientIp);
 
             if (req.isAuthenticated()) {
                 res.send({
@@ -53,7 +53,7 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            let ipUser = ip.address();
+            let ipUser = requestIp.getClientIp(req);
 
             if (req.isAuthenticated()) {
                 this.addNewUser(ipUser, req.user.local.email);
@@ -173,7 +173,7 @@ class routes {
 
         let updateTable = this.updateTableData;
         this._app.post('/changeState', function (req, res) {
-            let ipUser = ip.address();
+            let ipUser = requestIp.getClientIp(req);
             if (req.isAuthenticated()) {
                 updateTable(ipUser, req.user.local.email, req.body);
                 updateUserDataDB(req.user.local.email, ipUser, req.body);
