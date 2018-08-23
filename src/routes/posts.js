@@ -19,7 +19,10 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
-            let clientIp = requestIp.getClientIp(req);
+            let clientIp = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress || requestIp.getClientIp(req).replace(/[f,:]/g, "");
             console.log(clientIp);
 
             if (req.isAuthenticated()) {
@@ -53,7 +56,10 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
+            let ipUser = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress || requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
             if (req.isAuthenticated()) {
                 addNewUserDB(req.user.local.email, ipUser);
@@ -82,7 +88,10 @@ class routes {
 
 
         this._app.post('/signup', (req, res, next) => {
-            req.body.ip = requestIp.getClientIp(req).replace(/[f,:]/g, "");
+            req.body.ip = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress || requestIp.getClientIp(req).replace(/[f,:]/g, "");
             passport.authenticate('local-signup', function (err, user, info) {
                 if (err) {
                     return next(err); // will generate a 500 error
@@ -176,7 +185,10 @@ class routes {
 
         let updateTable = this.updateTableData;
         this._app.post('/changeState', function (req, res) {
-            let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
+            let ipUser = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress || requestIp.getClientIp(req).replace(/[f,:]/g, "");
             if (req.isAuthenticated()) {
                 updateUserDataDB(req.user.local.email, ipUser, req.body);
                 updateTable(ipUser, req.user.local.email, req.body);
@@ -403,7 +415,7 @@ setInterval(function () {
                         j++;
                         setTimeout(() => {
                             gSheets.update(key + numberRange, [[obj[key]]]);
-                        }, 10*j)
+                        }, 10 * j)
                     }
                 }, 100 * i);
             });
