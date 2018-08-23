@@ -53,7 +53,7 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            let ipUser = requestIp.getClientIp(req);
+            let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
             if (req.isAuthenticated()) {
                 this.addNewUser(ipUser, req.user.local.email);
@@ -173,7 +173,7 @@ class routes {
 
         let updateTable = this.updateTableData;
         this._app.post('/changeState', function (req, res) {
-            let ipUser = requestIp.getClientIp(req);
+            let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
             if (req.isAuthenticated()) {
                 updateTable(ipUser, req.user.local.email, req.body);
                 updateUserDataDB(req.user.local.email, ipUser, req.body);
