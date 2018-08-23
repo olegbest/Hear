@@ -113,13 +113,13 @@ module.exports = {
             }
         )
     },
-    remove: function (range) {
+    remove: function (range, callback) {
         sheets.spreadsheets.values.clear({
             spreadsheetId: spreadsheetId,
             range: range
         }, (err, res) => {
             if (err) return console.log('The API returned an error: ' + err);
-            const rows = res;
+            callback();
         })
     },
     get: function (range, callback) {

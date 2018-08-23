@@ -49,7 +49,7 @@ module.exports = function (passport) {
                 User.findOne({'local.email': email}, function (err, user) {
                     // if there are any errors, return the error
                     if (err) {
-                        console.log(err)
+                        console.log(err);
                         return done(err);
                     }
 
@@ -59,37 +59,62 @@ module.exports = function (passport) {
                         return done(null, false, {user: false, message: "That email is already taken"});
                     } else {
 
-                        // if there is no user with that email
-                        // create the user
-                        var newUser = new User();
+                        User.findOne({'local.ip': req.body.ip}, function (err, userIp) {
+                            if (userIp && !userIp.local.email) {
+                                let newUser = new User();
+                                userIp.local = {
+                                    email: email,
+                                    password: newUser.generateHash(password),
+                                    firstName: req.body.firstName,
+                                    lastName: req.body.lastName,
+                                    birthday: req.body.birthday,
+                                    gender: req.body.gender,
+                                    ranges: [],
+                                    ip: req.body.ip
+                                };
+                                userIp.save(function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                        throw err;
+                                    }
+                                    console.log("User was register");
+                                    return done(null, newUser, {user: true});
+                                })
+                            } else {
+                                let newUser = new User();
 
-                        // set the user's local credentials
-                        newUser.local = {
-                            email: email,
-                            password: newUser.generateHash(password),
-                            firstName: req.body.firstName,
-                            lastName: req.body.lastName,
-                            birthday: req.body.birthday,
-                            gender: req.body.gender,
-                            ranges: []
-                        };
+                                // set the user's local credentials
+                                newUser.local = {
+                                    email: email,
+                                    password: newUser.generateHash(password),
+                                    firstName: req.body.firstName,
+                                    lastName: req.body.lastName,
+                                    birthday: req.body.birthday,
+                                    gender: req.body.gender,
+                                    ranges: [],
+                                    ip: req.body.ip
+                                };
 
-                        // save the user
-                        newUser.save(function (err) {
-                            if (err) {
-                                throw err;
-                                console.log(err)
+                                // save the user
+                                newUser.save(function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                        throw err;
+                                    }
+                                    console.log("User was register");
+                                    return done(null, newUser, {user: true});
+                                });
                             }
-                            console.log("User was register")
-                            return done(null, newUser, {user: true});
-                        });
+                        })
                     }
 
                 });
 
-            });
+            })
+            ;
 
-        }));
+        })
+    );
 
     passport.use('local-login', new LocalStrategy({
             // by default, local strategy uses username and password, we will override with email

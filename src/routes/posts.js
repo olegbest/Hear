@@ -56,9 +56,11 @@ class routes {
             let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
             if (req.isAuthenticated()) {
+                addNewUserDB(req.user.local.email, ipUser);
                 this.addNewUser(ipUser, req.user.local.email);
                 res.send({firstName: req.user.local.firstName, authenticate: true});
             } else {
+                addNewUserDB("", ipUser);
                 this.addNewUser(ipUser, "");
                 res.send({authenticate: false, message: req.flash()})
             }
@@ -80,6 +82,7 @@ class routes {
 
 
         this._app.post('/signup', (req, res, next) => {
+            req.body.ip = requestIp.getClientIp(req).replace(/[f,:]/g, "");
             passport.authenticate('local-signup', function (err, user, info) {
                 if (err) {
                     return next(err); // will generate a 500 error
@@ -175,12 +178,13 @@ class routes {
         this._app.post('/changeState', function (req, res) {
             let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
             if (req.isAuthenticated()) {
-                updateTable(ipUser, req.user.local.email, req.body);
                 updateUserDataDB(req.user.local.email, ipUser, req.body);
-                res.send({authenticate: true});
+                updateTable(ipUser, req.user.local.email, req.body);
+                res.send({authenticate: true, firstName: req.user.local.firstName});
             } else {
+                updateUserDataDB("", ipUser, req.body)
                 updateTable(ipUser, "", req.body);
-                res.send({authenticate: false})
+                res.send({authenticate: false, firstName: ""})
             }
         });
 
@@ -306,8 +310,8 @@ function findUser(ipUser, email, callback) {
     });
 }
 
-function findUserDB(email, callback) {
-    User.findOne({'local.email': email}, function (err, user) {
+function findUserDB(email, ipUser, callback) {
+    User.findOne({$or: [{'local.email': email}, {'local.ip': ipUser}]}, function (err, user) {
         // if there are any errors, return the error
         if (err)
             return err;
@@ -316,11 +320,12 @@ function findUserDB(email, callback) {
         callback(user);
         if (user) {
         }
+
     })
 }
 
 function updateUserDataDB(email, ipUser, data) {
-    findUserDB(email, (user) => {
+    findUserDB(email, ipUser, (user) => {
         if (user) {
             let range;
             if (data.hasOwnProperty("leftEar")) {
@@ -341,8 +346,70 @@ function updateUserDataDB(email, ipUser, data) {
     });
 }
 
-function addNewUserDB() {
+function addNewUserDB(email, ipUser) {
+    findUserDB(email, ipUser, (user) => {
+        if (user) {
+            return
+        } else {
+            let newUser = new User();
 
+            // set the user's local credentials
+            newUser.local = {
+                ranges: [],
+                ip: ipUser
+            };
+
+            // save the user
+            newUser.save(function (err) {
+                if (err) {
+                    console.log(err);
+                    throw err;
+                }
+
+            })
+        }
+    })
 }
+
+setInterval(function () {
+    gSheets.remove("A5:U", () => {
+        User.find({}, (err, users) => {
+            if (err)
+                return err;
+            users.forEach(function (user, i) {
+                setTimeout(function () {
+
+
+                    let obj = {};
+                    user.local.ranges.forEach(function (el) {
+                        if (el.text && el.name) {
+                            obj[el.name] = el.text;
+                        }
+                    });
+                    user.local.ranges = [];
+                    for (let key in obj) {
+                        user.local.ranges.push({name: key, text: obj[key]});
+                    }
+                    user.save((err) => {
+                        if (err) {
+                            console.log(err);
+                            throw err;
+                        }
+                    });
+                    let numberRange = 5 + i;
+                    gSheets.add("A" + numberRange, [[user.local.ip, user.local.email]]);
+                    let j = 0;
+                    for (let key in obj) {
+                        j++;
+                        setTimeout(() => {
+                            gSheets.update(key + numberRange, [[obj[key]]]);
+                        }, 10*j)
+                    }
+                }, 100 * i);
+            });
+            console.log(users);
+        })
+    });
+}, 15 * 60 * 1000);
 
 module.exports = routes;
