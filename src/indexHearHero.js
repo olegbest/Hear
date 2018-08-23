@@ -15,7 +15,7 @@ let config = require('./config/config');
 
 const cors = require('cors');
 const routes = require('./routes/posts');
-app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
+app.use(cors({credentials: true, origin: 'http://exam.botcube.co'}));
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
