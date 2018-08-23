@@ -55,7 +55,7 @@ module.exports = function (passport) {
 
                     // check to see if theres already a user with that email
                     if (user) {
-                        console.log("That email is already taken")
+                        console.log("That email is already taken");
                         return done(null, false, {user: false, message: "That email is already taken"});
                     } else {
 
@@ -70,7 +70,8 @@ module.exports = function (passport) {
                             firstName: req.body.firstName,
                             lastName: req.body.lastName,
                             birthday: req.body.birthday,
-                            gender: req.body.gender
+                            gender: req.body.gender,
+                            ranges: []
                         };
 
                         // save the user

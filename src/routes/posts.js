@@ -7,6 +7,7 @@ const sendMail = require('./../libs/senMail').sendMail;
 const ip = require('ip');
 const gSheets = require('./../googledocs/index');
 
+const requestIp = require('request-ip');
 
 class routes {
     constructor(app) {
@@ -18,13 +19,16 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
+            let clientIp = requestIp.getClientIp(req);
+            console.log(clientIp)
 
             if (req.isAuthenticated()) {
                 res.send({
                     firstName: req.user.local.firstName,
                     lastName: req.user.local.lastName,
                     birthday: req.user.local.birthday,
-                    authenticate: true
+                    authenticate: true,
+                    ip: clientIp
                 });
             } else {
                 res.send({authenticate: false, message: req.flash()})
@@ -172,6 +176,7 @@ class routes {
             let ipUser = ip.address();
             if (req.isAuthenticated()) {
                 updateTable(ipUser, req.user.local.email, req.body);
+                updateUserDataDB(req.user.local.email, ipUser, req.body);
                 res.send({authenticate: true});
             } else {
                 updateTable(ipUser, "", req.body);
@@ -179,7 +184,7 @@ class routes {
             }
         });
 
-        let update = this.updateUserData;
+        let update = this.updateUserDataProfile;
         this._app.post('/profile', function (req, res) {
             if (req.isAuthenticated()) {
                 update(req.user.local.email, req.body)
@@ -189,7 +194,7 @@ class routes {
         // this._app.get('/profile', passport.authenticationMiddleware(), renderProfile);
     }
 
-    updateUserData(email, data) {
+    updateUserDataProfile(email, data) {
         console.log(data);
         User.findOne({'local.email': email}, function (err, user) {
             // if there are any errors, return the error
@@ -274,7 +279,7 @@ class routes {
                     range = data.type.range[1] + res;
                 }
             } else {
-                 range = data.type.range + res;
+                range = data.type.range + res;
 
             }
             gSheets.update(range, [[data.name]])
@@ -299,6 +304,45 @@ function findUser(ipUser, email, callback) {
         }
         callback(-1);
     });
+}
+
+function findUserDB(email, callback) {
+    User.findOne({'local.email': email}, function (err, user) {
+        // if there are any errors, return the error
+        if (err)
+            return err;
+
+        // check to see if theres already a user with that email
+        callback(user);
+        if (user) {
+        }
+    })
+}
+
+function updateUserDataDB(email, ipUser, data) {
+    findUserDB(email, (user) => {
+        if (user) {
+            let range;
+            if (data.hasOwnProperty("leftEar")) {
+                if (data.leftEar) {
+                    range = data.type.range[0];
+                } else {
+                    range = data.type.range[1];
+                }
+            } else {
+                range = data.type.range;
+
+            }
+            user.local.ranges.push({name: range, text: data.name});
+            user.save((err) => {
+                if (err) console.log(err)
+            })
+        }
+    });
+}
+
+function addNewUserDB() {
+
 }
 
 module.exports = routes;
