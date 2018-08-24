@@ -139,7 +139,7 @@ class routes {
                     }
                     findUserDB(req.user.local.email, "", (mainUser) => {
                         console.log(mainUser);
-                        findUserDB(null, req.sessionID, (user) => {
+                        findUserDB(undefined, req.sessionID, (user) => {
                             // console.log(user);
                             if (user) {
                                 mainUser.local.ip = req.sessionID;
