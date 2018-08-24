@@ -20,22 +20,23 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
-            macaddress.one((err, macAddress) => {
-                if (err) console.log(err);
-                let clientIp = requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
-                if (req.isAuthenticated()) {
-                    res.send({
-                        firstName: req.user.local.firstName,
-                        lastName: req.user.local.lastName,
-                        birthday: req.user.local.birthday,
-                        authenticate: true,
-                        ip: macAddress
-                    });
-                } else {
-                    res.send({authenticate: false, message: req.flash()})
-                }
-            })
+            if (err) console.log(err);
+            let clientIp = req.sessionID;
+            console.log(clientIp);
+
+            if (req.isAuthenticated()) {
+                res.send({
+                    firstName: req.user.local.firstName,
+                    lastName: req.user.local.lastName,
+                    birthday: req.user.local.birthday,
+                    authenticate: true,
+                    ip: clientIp
+                });
+            } else {
+                res.send({authenticate: false, message: req.flash()})
+            }
+
         });
 
         this._app.get('/logout', function (req, res) {
@@ -56,21 +57,17 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            let mac1 = macaddress.networkInterfaces();
-            macaddress.all((err, macAddress) => {
-                let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
+            let ipUser = req.sessionID;
 
-                if (req.isAuthenticated()) {
-                    addNewUserDB(req.user.local.email, macAddress);
-                    this.addNewUser(macAddress, req.user.local.email);
-                    res.send({firstName: req.user.local.firstName, authenticate: true});
-                } else {
-                    // addNewUserDB("", macAddress);
-                    // this.addNewUser(macAddress, "");
-                    console.log(mac1);
-                    res.send({authenticate: false, message: req.flash(), mac: mac1})
-                }
-            })
+            if (req.isAuthenticated()) {
+                addNewUserDB(req.user.local.email, ipUser);
+                this.addNewUser(ipUser, req.user.local.email);
+                res.send({firstName: req.user.local.firstName, authenticate: true});
+            } else {
+                addNewUserDB("", ipUser);
+                this.addNewUser(ipUser, "");
+                res.send({authenticate: false, message: req.flash()})
+            }
 
             // console.log(req.user);
         });
@@ -89,30 +86,28 @@ class routes {
 
 
         this._app.post('/signup', (req, res, next) => {
-            macaddress.one((err, macAddress) => {
-                req.body.ip = requestIp.getClientIp(req).replace(/[f,:]/g, "");
-                passport.authenticate('local-signup', function (err, user, info) {
-                    if (err) {
-                        return next(err); // will generate a 500 error
+            req.body.ip = req.sessionID;
+            passport.authenticate('local-signup', function (err, user, info) {
+                if (err) {
+                    return next(err); // will generate a 500 error
+                }
+                // Generate a JSON response reflecting authentication status
+                if (!info.user) {
+                    return res.send({authenticate: false, message: info.message});
+                }
+                // ***********************************************************************
+                // "Note that when using a custom callback, it becomes the application's
+                // responsibility to establish a session (by calling req.login()) and send
+                // a response."
+                // Source: http://passportjs.org/docs
+                // ***********************************************************************
+                req.login(user, loginErr => {
+                    if (loginErr) {
+                        return next(loginErr);
                     }
-                    // Generate a JSON response reflecting authentication status
-                    if (!info.user) {
-                        return res.send({authenticate: false, message: info.message});
-                    }
-                    // ***********************************************************************
-                    // "Note that when using a custom callback, it becomes the application's
-                    // responsibility to establish a session (by calling req.login()) and send
-                    // a response."
-                    // Source: http://passportjs.org/docs
-                    // ***********************************************************************
-                    req.login(user, loginErr => {
-                        if (loginErr) {
-                            return next(loginErr);
-                        }
-                        return res.send({authenticate: true});
-                    });
-                })(req, res, next);
-            })
+                    return res.send({authenticate: true});
+                });
+            })(req, res, next);
         });
 
         this._app.post('/login', function (req, res, next) {
@@ -185,18 +180,16 @@ class routes {
 
         let updateTable = this.updateTableData;
         this._app.post('/changeState', function (req, res) {
-            macaddress.one((err, macAddress) => {
-                let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
-                if (req.isAuthenticated()) {
-                    updateUserDataDB(req.user.local.email, macAddress, req.body);
-                    updateTable(macAddress, req.user.local.email, req.body);
-                    res.send({authenticate: true, firstName: req.user.local.firstName});
-                } else {
-                    updateUserDataDB("", macAddress, req.body)
-                    updateTable(macAddress, "", req.body);
-                    res.send({authenticate: false, firstName: ""})
-                }
-            })
+            let ipUser = req.sessionID;
+            if (req.isAuthenticated()) {
+                updateUserDataDB(req.user.local.email, ipUser, req.body);
+                updateTable(ipUser, req.user.local.email, req.body);
+                res.send({authenticate: true, firstName: req.user.local.firstName});
+            } else {
+                updateUserDataDB("", ipUser, req.body)
+                updateTable(ipUser, "", req.body);
+                res.send({authenticate: false, firstName: ""})
+            }
         });
 
         let update = this.updateUserDataProfile;
@@ -265,6 +258,7 @@ class routes {
     }
 
     addNewUser(ipUser, email) {
+        console.log(ipUser);
         findUser(ipUser, email, (res) => {
             console.log(res);
             if (res > -1) {
