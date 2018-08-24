@@ -51,7 +51,7 @@ class routes {
                 //     if (user) {
                 //         user.local.ip = req.sessionID;
                 //         user.save((err) => {
-                //             res.send({logout: true});
+                            res.send({logout: true});
                 //         })
                 //     }
                 // });
