@@ -47,14 +47,14 @@ class routes {
             let email = req.user.local.email;
             req.session.destroy(function () {
                 res.clearCookie('connect.sid');
-                findUserDB(email, "", (user) => {
-                    if (user) {
-                        user.local.ip = req.sessionID;
-                        user.save((err) => {
-                            res.send({logout: true});
-                        })
-                    }
-                });
+                // findUserDB(email, "", (user) => {
+                //     if (user) {
+                //         user.local.ip = req.sessionID;
+                //         user.save((err) => {
+                //             res.send({logout: true});
+                //         })
+                //     }
+                // });
             })
 
             // res.redirect('/');
