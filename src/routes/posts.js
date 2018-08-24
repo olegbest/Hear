@@ -68,7 +68,7 @@ class routes {
                     // addNewUserDB("", macAddress);
                     // this.addNewUser(macAddress, "");
                     console.log(mac1);
-                    res.send({authenticate: false, message: req.flash(), mac: macAddress})
+                    res.send({authenticate: false, message: req.flash(), mac: mac1})
                 }
             })
 
