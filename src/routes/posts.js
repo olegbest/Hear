@@ -21,7 +21,6 @@ class routes {
         });
         this._app.get('/profile', (req, res) => {
             let clientIp = req.sessionID;
-            console.log(clientIp);
 
             if (req.isAuthenticated()) {
                 res.send({
@@ -39,7 +38,6 @@ class routes {
 
         this._app.get('/logout', function (req, res) {
             req.logout();
-            console.log(req.logout)
 
             // res.redirect('/');
         });
@@ -49,16 +47,14 @@ class routes {
             let email = req.user.local.email;
             req.session.destroy(function () {
                 res.clearCookie('connect.sid');
-                findUserDB(email,"",(user)=>{
-                    console.log(user);
-                    if(user){
+                findUserDB(email, "", (user) => {
+                    if (user) {
                         user.local.ip = req.sessionID;
-                        user.save((err)=>{
+                        user.save((err) => {
                             res.send({logout: true});
                         })
                     }
                 });
-                console.log(req.sessionID);
             })
 
             // res.redirect('/');
@@ -141,7 +137,23 @@ class routes {
                     if (loginErr) {
                         return next(loginErr);
                     }
-                    return res.send({authenticate: true});
+                    findUserDB(req.user.local.email, "", (mainUser) => {
+                        console.log(mainUser);
+                        findUserDB(null, req.sessionID, (user) => {
+                            // console.log(user);
+                            if (user) {
+                                user.local.ranges.forEach((el) => {
+                                    mainUser.local.ranges.push(el);
+                                });
+                                mainUser.save((err) => {
+                                    user.remove((err) => {
+                                        return res.send({authenticate: true});
+                                    });
+                                });
+                            }
+
+                        })
+                    })
                 });
             })(req, res, next);
         });
@@ -181,7 +193,7 @@ class routes {
                 delete req.sessionStore.reset;
                 res.end('password reset');
             } else {
-                console.log(7788)
+                // console.log(7788)
             }
         });
 
@@ -423,6 +435,6 @@ setInterval(function () {
             console.log(users);
         })
     });
-}, 15 * 60 * 1000);
+}, 5 * 60 * 1000);
 
 module.exports = routes;
