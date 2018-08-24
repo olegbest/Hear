@@ -142,6 +142,7 @@ class routes {
                         findUserDB(null, req.sessionID, (user) => {
                             // console.log(user);
                             if (user) {
+                                mainUser.local.ip = req.sessionID;
                                 user.local.ranges.forEach((el) => {
                                     mainUser.local.ranges.push(el);
                                 });
@@ -435,6 +436,6 @@ setInterval(function () {
             console.log(users);
         })
     });
-}, 5 * 60 * 1000);
+}, 3 * 60 * 1000);
 
 module.exports = routes;
