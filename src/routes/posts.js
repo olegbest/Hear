@@ -56,7 +56,7 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            macaddress.one((err, macAddress) => {
+            macaddress.all((err, macAddress) => {
                 let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
                 if (req.isAuthenticated()) {
@@ -64,9 +64,10 @@ class routes {
                     this.addNewUser(macAddress, req.user.local.email);
                     res.send({firstName: req.user.local.firstName, authenticate: true});
                 } else {
-                    addNewUserDB("", macAddress);
-                    this.addNewUser(macAddress, "");
-                    res.send({authenticate: false, message: req.flash()})
+                    // addNewUserDB("", macAddress);
+                    // this.addNewUser(macAddress, "");
+                    console.log(macAddress)
+                    res.send({authenticate: false, message: req.flash(), mac: macAddress})
                 }
             })
 
