@@ -12,7 +12,7 @@ var userSchema = mongoose.Schema({
         birthday: String,
         gender: String,
         ranges: [{name: String, text: String}],
-        ip: String
+        ip: {type: String}
     }
 
 });

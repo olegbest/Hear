@@ -20,8 +20,6 @@ class routes {
 
         });
         this._app.get('/profile', (req, res) => {
-
-            if (err) console.log(err);
             let clientIp = req.sessionID;
             console.log(clientIp);
 
@@ -48,9 +46,19 @@ class routes {
         this._app.post('/logout', function (req, res) {
             // console.log(req.session);
             // req.logout();
+            let email = req.user.local.email;
             req.session.destroy(function () {
                 res.clearCookie('connect.sid');
-                res.send({logout: true})
+                findUserDB(email,"",(user)=>{
+                    console.log(user);
+                    if(user){
+                        user.local.ip = req.sessionID;
+                        user.save((err)=>{
+                            res.send({logout: true});
+                        })
+                    }
+                });
+                console.log(req.sessionID);
             })
 
             // res.redirect('/');
