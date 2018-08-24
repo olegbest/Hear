@@ -22,7 +22,7 @@ class routes {
         this._app.get('/profile', (req, res) => {
 
             if (err) console.log(err);
-            let clientIp = req.sessionStore.customId;
+            let clientIp = req.sessionID;
             console.log(clientIp);
 
             if (req.isAuthenticated()) {
@@ -57,10 +57,7 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
-            if (!req.sessionStore.customId) {
-                req.sessionStore.customId = req.sessionID;
-            }
-            let ipUser = req.sessionStore.customId;
+            let ipUser = req.sessionID;
 
             if (req.isAuthenticated()) {
                 addNewUserDB(req.user.local.email, ipUser);
@@ -89,7 +86,7 @@ class routes {
 
 
         this._app.post('/signup', (req, res, next) => {
-            req.body.ip = req.sessionStore.customId;
+            req.body.ip = req.sessionID;
             passport.authenticate('local-signup', function (err, user, info) {
                 if (err) {
                     return next(err); // will generate a 500 error
@@ -183,7 +180,7 @@ class routes {
 
         let updateTable = this.updateTableData;
         this._app.post('/changeState', function (req, res) {
-            let ipUser = req.sessionStore.customId;
+            let ipUser = req.sessionID;
             if (req.isAuthenticated()) {
                 updateUserDataDB(req.user.local.email, ipUser, req.body);
                 updateTable(ipUser, req.user.local.email, req.body);
@@ -309,10 +306,8 @@ function findUser(ipUser, email, callback) {
                 callback(i + 1);
                 return;
             } else if (raw[i][1] === email) {
-                if (email) {
-                    callback(i + 1);
-                    return;
-                }
+                callback(i + 1);
+                return;
 
             }
         }
