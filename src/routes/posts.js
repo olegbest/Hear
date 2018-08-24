@@ -56,6 +56,7 @@ class routes {
         });
 
         this._app.get('/', (req, res) => {
+            let mac1 = macaddress.networkInterfaces();
             macaddress.all((err, macAddress) => {
                 let ipUser = requestIp.getClientIp(req).replace(/[f,:]/g, "");
 
@@ -66,7 +67,7 @@ class routes {
                 } else {
                     // addNewUserDB("", macAddress);
                     // this.addNewUser(macAddress, "");
-                    console.log(macAddress)
+                    console.log(mac1);
                     res.send({authenticate: false, message: req.flash(), mac: macAddress})
                 }
             })
