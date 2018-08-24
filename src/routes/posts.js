@@ -109,7 +109,10 @@ class routes {
                     if (loginErr) {
                         return next(loginErr);
                     }
-                    return res.send({authenticate: true});
+                    req.session.destroy(function () {
+                        res.clearCookie('connect.sid');
+                        return res.send({authenticate: true});
+                    })
                 });
             })(req, res, next);
         });
