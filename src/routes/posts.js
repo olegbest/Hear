@@ -151,7 +151,7 @@ class routes {
                                 });
                                 mainUser.save((err) => {
                                     user.remove((err) => {
-                                        return res.send({authenticate: true});
+                                        return res.send({authenticate: true, firstName: req.user.local.firstName});
                                     });
                                 });
                             }
