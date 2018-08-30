@@ -3,7 +3,7 @@ const passport = require('passport');
 const User = require('./../authentication/user');
 const crypto = require('crypto');
 const base64url = require('base64url');
-const sendMail = require('./../libs/senMail').sendMail;
+const sendMail = require('./../libs/senMail');
 // const ip = require('ip');
 const gSheets = require('./../googledocs/index');
 
@@ -51,7 +51,7 @@ class routes {
                 //     if (user) {
                 //         user.local.ip = req.sessionID;
                 //         user.save((err) => {
-                            res.send({logout: true});
+                res.send({logout: true});
                 //         })
                 //     }
                 // });
@@ -174,7 +174,7 @@ class routes {
                     if (status) {
                         let token = base64url(crypto.randomBytes(32));
                         req.sessionStore.reset = {email: email, id: token};
-                        sendMail(firstName, email, token, req.get("origin"));
+                        sendMail.sendMail(firstName, email, token, req.get("origin"));
                         res.send({sendMail: true})
                     } else {
                         res.send({message: 'No user found'})
@@ -222,6 +222,17 @@ class routes {
                 update(req.user.local.email, req.body)
             }
         });
+
+        this._app.post('/sendEmailMessage', (req, res) => {
+            console.log(req.body);
+            if (req.isAuthenticated()) {
+                req.body.info = "First Name: "+req.user.local.firstName + "<br>"+"Email: "+req.user.local.email + "<br>"+ req.body.info;
+            }
+            sendMail.sendFeedBackMessage(req.body, ()=>{
+                res.send({sendMail: true});
+            });
+        })
+
 
         // this._app.get('/profile', passport.authenticationMiddleware(), renderProfile);
     }

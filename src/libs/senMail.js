@@ -31,4 +31,25 @@ function sendMail(firstName, email, token, url) {
 
 }
 
+function sendFeedBackMessage(data, callback) {
+    let mail = {
+        from: "Hear Hero Service",
+        to: "olegbestboy@mail.ru",
+        subject: "Message",
+        html: data.info + "<br>" + data.message
+    };
+    smtpTransport.sendMail(mail, function (error, response) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log("Message sent: " + response.message);
+            callback();
+        }
+
+        smtpTransport.close();
+
+    });
+}
+
 module.exports.sendMail = sendMail;
+module.exports.sendFeedBackMessage = sendFeedBackMessage;
