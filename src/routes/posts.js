@@ -316,16 +316,8 @@ class routes {
         findUser(ipUser, email, (res) => {
             console.log(data);
             let range;
-            if (data.hasOwnProperty("leftEar")) {
-                if (data.leftEar) {
-                    range = data.type.range[0] + res;
-                } else {
-                    range = data.type.range[1] + res;
-                }
-            } else {
                 range = data.type.range + res;
 
-            }
             gSheets.update(range, [[data.name]])
         })
     }
