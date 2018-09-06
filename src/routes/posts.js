@@ -106,13 +106,17 @@ class routes {
                 // Source: http://passportjs.org/docs
                 // ***********************************************************************
                 req.login(user, loginErr => {
+                    console.log(user)
                     if (loginErr) {
+                        console.log(loginErr)
                         return next(loginErr);
                     }
+                    console.log(req.user.local)
                     req.session.destroy(function () {
                         res.clearCookie('connect.sid');
-                        return res.send({authenticate: true});
+                        return res.send({authenticate: true, firstName: req.user.local.firstName});
                     })
+
                 });
             })(req, res, next);
         });
@@ -142,21 +146,31 @@ class routes {
                     }
                     findUserDB(req.user.local.email, "", (mainUser) => {
                         console.log(mainUser);
-                        findUserDB(undefined, req.sessionID, (user) => {
-                            // console.log(user);
-                            if (user) {
-                                mainUser.local.ip = req.sessionID;
-                                user.local.ranges.forEach((el) => {
-                                    mainUser.local.ranges.push(el);
-                                });
-                                mainUser.save((err) => {
-                                    user.remove((err) => {
-                                        return res.send({authenticate: true, firstName: req.user.local.firstName});
-                                    });
-                                });
-                            }
+                        User.find({'local.ip': req.sessionID}, (err, users) => {
 
-                        })
+                            console.log(users);
+                            if (users) {
+                                console.log("Users")
+                                users.forEach((user) => {
+                                    console.log("User")
+                                    let data = user.local;
+                                    if (!data.email) {
+                                        mainUser.local.ip = req.sessionID;
+                                        user.local.ranges.forEach((el) => {
+                                            mainUser.local.ranges.push(el);
+                                        });
+                                        mainUser.save((err) => {
+                                            user.remove((err) => {
+                                                return res.send({
+                                                    authenticate: true,
+                                                    firstName: req.user.local.firstName
+                                                });
+                                            });
+                                        })
+                                    }
+                                })
+                            }
+                        });
                     })
                 });
             })(req, res, next);
@@ -220,15 +234,16 @@ class routes {
         this._app.post('/profile', function (req, res) {
             if (req.isAuthenticated()) {
                 update(req.user.local.email, req.body)
+                res.send({authenticate: true})
             }
         });
 
         this._app.post('/sendEmailMessage', (req, res) => {
             console.log(req.body);
             if (req.isAuthenticated()) {
-                req.body.info = "First Name: "+req.user.local.firstName + "<br>"+"Email: "+req.user.local.email + "<br>"+ req.body.info;
+                req.body.info = "First Name: " + req.user.local.firstName + "<br>" + "Email: " + req.user.local.email + "<br>" + req.body.info;
             }
-            sendMail.sendFeedBackMessage(req.body, ()=>{
+            sendMail.sendFeedBackMessage(req.body, () => {
                 res.send({sendMail: true});
             });
         })
@@ -316,7 +331,7 @@ class routes {
         findUser(ipUser, email, (res) => {
             console.log(data);
             let range;
-                range = data.type.range + res;
+            range = data.type.range + res;
 
             gSheets.update(range, [[data.name]])
         })

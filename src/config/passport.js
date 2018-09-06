@@ -69,7 +69,7 @@ module.exports = function (passport) {
                                     lastName: req.body.lastName,
                                     birthday: req.body.birthday,
                                     gender: req.body.gender,
-                                    ranges: [],
+                                    ranges: userIp.local.ranges,
                                     ip: req.body.ip
                                 };
                                 userIp.save(function (err) {
