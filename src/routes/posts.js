@@ -450,9 +450,9 @@ setInterval(function () {
                         j++;
                         setTimeout(() => {
                             gSheets.update(key + numberRange, [[obj[key]]]);
-                        }, 10 * j)
+                        }, 15 * j)
                     }
-                }, 100 * i);
+                }, 200 * i);
             });
             console.log(users);
         })
