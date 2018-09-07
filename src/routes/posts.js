@@ -418,13 +418,13 @@ function addNewUserDB(email, ipUser) {
     })
 }
 
-setInterval(function () {
+setInterval(async function () {
     gSheets.remove("A5:U", () => {
         User.find({}, (err, users) => {
             if (err)
                 return err;
-            users.forEach(function (user, i) {
-                setTimeout(function () {
+            users.forEach(async function (user, i) {
+                setTimeout(async function () {
 
 
                     let obj = {};
@@ -444,17 +444,44 @@ setInterval(function () {
                         }
                     });
                     let numberRange = 5 + i;
-                    gSheets.add("A" + numberRange, [[user.local.ip, user.local.email]]);
-                    let j = 0;
+                    let objSymbols = {
+                        "A": 0,
+                        "B": 1,
+                        "C": 2,
+                        "D": 3,
+                        "E": 4,
+                        "F": 5,
+                        "G": 6,
+                        "H": 7,
+                        "I": 8,
+                        "J": 9,
+                        "K": 10,
+                        "L": 11,
+                        "M": 12,
+                        "N": 13,
+                        "O": 14,
+                        "P": 15,
+                        "Q": 16,
+                        "R": 17,
+                        "S": 18,
+                        "T": 19,
+                        "U": 20,
+                    };
+                    let userData = [user.local.ip, user.local.email];
+                    // await gSheets.add("A" + numberRange, [[user.local.ip, user.local.email]]);
+                    // console.log(obj)
                     for (let key in obj) {
-                        j++;
-                        setTimeout(() => {
-                            gSheets.update(key + numberRange, [[obj[key]]]);
-                        }, 15 * j)
+                        // console.log(user.local.ip);
+                        // console.log(key + numberRange);
+                        userData[objSymbols[key]] = obj[key];
                     }
+                    console.log(userData)
+                    await gSheets.update("A" + numberRange + ":U" + numberRange, [userData]);
+
+
                 }, 200 * i);
             });
-            console.log(users);
+            // console.log(users);
         })
     });
 }, 3 * 60 * 1000);

@@ -73,7 +73,7 @@ const sheets = google.sheets({version: 'v4', auth});
 let spreadsheetId = '1GNONXHfZZjuzmoAQA8kumWwq8BSuVxZFJzLAuHJkG2c';
 
 module.exports = {
-    add: function (range, values) {
+    add: async function (range, values) {
         sheets.spreadsheets.values.append({
             spreadsheetId: spreadsheetId,
             range: range,
@@ -92,7 +92,7 @@ module.exports = {
             // console.log(res);
         });
     },
-    update: function (range, values) {
+    update: async function (range, values) {
         sheets.spreadsheets.values.update({
                 spreadsheetId: spreadsheetId,
                 range: range,
@@ -103,8 +103,8 @@ module.exports = {
                 }
             }, (err, res) => {
                 if (err) {
-                    console.error(err);
-                    console.log("ошибка");
+                    console.error(err.errors);
+                    console.log("ошибка range: "+range);
                     return;
                 }
 
