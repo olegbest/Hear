@@ -419,71 +419,63 @@ function addNewUserDB(email, ipUser) {
 }
 
 setInterval(async function () {
-    gSheets.remove("A5:U", () => {
-        User.find({}, (err, users) => {
+    gSheets.remove("A5:U", async () => {
+        User.find({}, async (err, users) => {
             if (err)
                 return err;
+
+            let arrUsers = [];
             users.forEach(async function (user, i) {
-                setTimeout(async function () {
-
-
-                    let obj = {};
-                    user.local.ranges.forEach(function (el) {
-                        if (el.text && el.name) {
-                            obj[el.name] = el.text;
-                        }
-                    });
-                    user.local.ranges = [];
-                    for (let key in obj) {
-                        user.local.ranges.push({name: key, text: obj[key]});
+                let obj = {};
+                user.local.ranges.forEach(function (el) {
+                    if (el.text && el.name) {
+                        obj[el.name] = el.text;
                     }
-                    user.save((err) => {
-                        if (err) {
-                            console.log(err);
-                            throw err;
-                        }
-                    });
-                    let numberRange = 5 + i;
-                    let objSymbols = {
-                        "A": 0,
-                        "B": 1,
-                        "C": 2,
-                        "D": 3,
-                        "E": 4,
-                        "F": 5,
-                        "G": 6,
-                        "H": 7,
-                        "I": 8,
-                        "J": 9,
-                        "K": 10,
-                        "L": 11,
-                        "M": 12,
-                        "N": 13,
-                        "O": 14,
-                        "P": 15,
-                        "Q": 16,
-                        "R": 17,
-                        "S": 18,
-                        "T": 19,
-                        "U": 20,
-                    };
-                    let userData = [user.local.ip, user.local.email];
-                    // await gSheets.add("A" + numberRange, [[user.local.ip, user.local.email]]);
-                    // console.log(obj)
-                    for (let key in obj) {
-                        // console.log(user.local.ip);
-                        // console.log(key + numberRange);
-                        userData[objSymbols[key]] = obj[key];
+                });
+                user.local.ranges = [];
+                for (let key in obj) {
+                    user.local.ranges.push({name: key, text: obj[key]});
+                }
+                user.save((err) => {
+                    if (err) {
+                        console.log(err);
+                        throw err;
                     }
-                    console.log(userData)
-                    await gSheets.update("A" + numberRange + ":U" + numberRange, [userData]);
-
-
-                }, 200 * i);
+                });
+                let objSymbols = {
+                    "A": 0,
+                    "B": 1,
+                    "C": 2,
+                    "D": 3,
+                    "E": 4,
+                    "F": 5,
+                    "G": 6,
+                    "H": 7,
+                    "I": 8,
+                    "J": 9,
+                    "K": 10,
+                    "L": 11,
+                    "M": 12,
+                    "N": 13,
+                    "O": 14,
+                    "P": 15,
+                    "Q": 16,
+                    "R": 17,
+                    "S": 18,
+                    "T": 19,
+                    "U": 20,
+                };
+                let userData = [user.local.ip, user.local.email];
+                for (let key in obj) {
+                    userData[objSymbols[key]] = obj[key];
+                }
+                arrUsers.push(userData);
             });
-            // console.log(users);
+            // console.log(arrUsers);
+            gSheets.update("A5", arrUsers);
         })
     });
 }, 3 * 60 * 1000);
+
 
 module.exports = routes;
