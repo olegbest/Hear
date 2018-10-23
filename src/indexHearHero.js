@@ -24,7 +24,13 @@ app.use(bodyParser()); // get information from html forms
 // required for passport
 app.use(session({
     secret: 'ilovescotchscotchyscotchscotch123HearHero',
-    store: new MongoStore({url: config.dbURL, mongoOptions: config.dbOptions, ttl: 5 * 24 * 60 * 60})
+    store: new MongoStore({
+        url: config.dbURL, mongoOptions: {
+            "auth": {"authSource": "admin"},
+            "user": config.dbOptions.user,
+            "pass": config.dbOptions.pass
+        }, ttl: 5 * 24 * 60 * 60
+    })
 })); // session secret
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
