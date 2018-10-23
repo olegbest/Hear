@@ -3,7 +3,10 @@ module.exports = {
     port: 8081,
     dbURL: `mongodb://${cfg.user}:${cfg.pass}@localhost:27017/HearHeroDB?authSource=admin&w=1`,
     dbOptions: {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        "auth": {"authSource": "admin"},
+        "user": cfg.user,
+        "pass": cfg.pass
     }
 
 };
