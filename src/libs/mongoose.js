@@ -1,5 +1,6 @@
-let mongoose = require('mongoose');
+let mongoose    = require('mongoose');
 let config = require('./../config/config');
+
 
 
 mongoose.createConnection(config.dbURL, config.dbOptions);
@@ -7,12 +8,13 @@ mongoose.createConnection(config.dbURL, config.dbOptions);
 var db = mongoose.connection;
 
 
+
 //db.dropDatabase();
 
 db.on('error', function (err) {
     console.log('connection error:' + err.message);
 });
-db.once('open', function callback() {
+db.once('open', function callback () {
     console.log("db opened");
 });
 
@@ -24,7 +26,7 @@ const PostSchema = new Schema({
     password: {
         type: String
     },
-    email: {
+    email : {
         type: String
     },
     data: {
