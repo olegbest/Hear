@@ -3,7 +3,7 @@ let config = require('./../config/config');
 
 
 
-mongoose.createConnection(config.dbURL, {useNewUrlParser: true});
+mongoose.createConnection(config.dbURL, config.dbOptions);
 
 var db = mongoose.connection;
 
