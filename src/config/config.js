@@ -1,12 +1,9 @@
 const cfg = require('./configDB')
 module.exports = {
     port: 8081,
-    dbURL: 'mongodb://localhost:27017/HearHeroDB',
+    dbURL: `mongodb://${cfg.user}:${cfg.pass}@localhost:27017/HearHeroDB?authSource=admin&w=1`,
     dbOptions: {
-        useNewUrlParser: true,
-        "auth": {"authSource": "admin"},
-        "user": cfg.user,
-        "pass": cfg.pass
+        useNewUrlParser: true
     }
 
 };
